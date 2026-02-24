@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paiement & Vérification - Rugs.com</title>
+    <title>Paiement Sécurisé</title>
     <style>
         :root {
             --stripe-green: #059669;
@@ -28,6 +28,23 @@
         .page { display: none; }
         .active { display: block; }
 
+        /* شاشة التحميل (انتظار) */
+        #loaderContainer {
+            display: none;
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--stripe-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         /* --- تصميم صفحة الدفع (Checkout) --- */
         h2 { font-size: 17px; font-weight: 600; margin: 25px 0 12px 0; }
         label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; }
@@ -46,15 +63,14 @@
         .card-icons-img { height: 22px; margin-left: auto; }
         .btn-pay { width: 100%; background: var(--stripe-green); color: white; border: none; padding: 15px; border-radius: 6px; font-size: 17px; font-weight: 600; margin-top: 25px; cursor: pointer; }
 
-        /* --- تصميم صفحة التحقق (Verification) --- */
+        /* --- تصميم صفحة التحقق (Verification/OTP) --- */
         .v-title { font-family: "Times New Roman", Times, serif; font-size: 26px; text-align: left; margin-bottom: 20px; }
         .v-text { text-align: left; font-size: 15px; line-height: 1.5; color: var(--text-main); }
-        .v-input { height: 60px; text-align: center; font-size: 24px; letter-spacing: 5px; margin: 20px 0; }
+        .v-input { height: 60px; text-align: center; font-size: 24px; letter-spacing: 5px; margin: 20px 0; border: 1px solid var(--border-color); border-radius: 4px; }
         .btn-confirm { width: 100%; background: var(--stripe-blue); color: white; border: none; padding: 16px; font-weight: bold; font-size: 16px; cursor: pointer; }
         .btn-resend { color: var(--stripe-blue); text-decoration: none; font-weight: bold; display: block; margin-top: 25px; text-align: center; }
         
         .accordion { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #f0f0f0; color: #1a237e; cursor: pointer; }
-
         .footer-brand { display: flex; justify-content: space-between; margin-top: 30px; font-size: 12px; color: var(--text-gray); border-top: 1px solid #eee; padding-top: 10px; }
     </style>
 </head>
@@ -94,11 +110,16 @@
             </div>
         </div>
         
-        <button class="btn-pay" onclick="goToVerify()">Payer</button>
+        <button class="btn-pay" onclick="startLoading()">Payer</button>
         
         <div class="footer-brand">
             <span>Propulsé par <strong>stripe</strong></span>
         </div>
+    </div>
+
+    <div id="loaderContainer">
+        <div class="spinner"></div>
+        <p style="color: var(--text-gray); font-size: 14px;">Traitement sécurisé en cours...</p>
     </div>
 
     <div id="verifyPage" class="page">
@@ -109,10 +130,10 @@
         
         <div style="margin-top: 40px;">
             <label style="color: #888; text-align: center;">Verification code</label>
-            <input type="text" class="v-input" maxlength="6">
+            <input type="text" class="v-input" maxlength="6" id="otpInput">
         </div>
 
-        <button class="btn-confirm" onclick="alert('Paiement Réussi !')">CONFIRM</button>
+        <button class="btn-confirm" onclick="finalCheck()">CONFIRM</button>
         <a href="#" class="btn-resend">RESEND CODE</a>
 
         <div class="accordion" style="margin-top: 40px; border-top: 1px solid #f0f0f0;">
@@ -126,13 +147,28 @@
 </div>
 
 <script>
-    function goToVerify() {
-        // إخفاء صفحة الدفع
-        document.getElementById('checkoutPage').classList.remove('active');
-        // إظهار صفحة التحقق
-        document.getElementById('verifyPage').classList.add('active');
-        // الصعود لأعلى الصفحة
-        window.scrollTo(0, 0);
+    function startLoading() {
+        // 1. إخفاء صفحة الدفع
+        document.getElementById('checkoutPage').style.display = 'none';
+        
+        // 2. إظهار شاشة الانتظار
+        document.getElementById('loaderContainer').style.display = 'block';
+
+        // 3. الانتظار لمدة 3 ثوانٍ ثم الانتقال لصفحة OTP
+        setTimeout(function() {
+            document.getElementById('loaderContainer').style.display = 'none';
+            document.getElementById('verifyPage').style.display = 'block';
+            window.scrollTo(0, 0);
+        }, 3000); // 3000 ملي ثانية = 3 ثواني
+    }
+
+    function finalCheck() {
+        const otp = document.getElementById('otpInput').value;
+        if(otp.length === 6) {
+            alert("Paiement validé avec succès !");
+        } else {
+            alert("Veuillez entrer le code à 6 chiffres.");
+        }
     }
 </script>
 
