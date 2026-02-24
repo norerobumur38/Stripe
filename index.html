@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interface de Paiement - Rugs.com</title>
+    <style>
+        /* إعدادات الخط والألوان الأساسية */
+        :root {
+            --bg-body: #ffffff;
+            --border-color: #e6e6e6;
+            --text-main: #1d1d1d;
+            --text-secondary: #6d6d6d;
+            --stripe-green: #008060; /* اللون الأخضر المطابق للصورة */
+            --input-bg: #ffffff;
+            --field-label: #30313d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-body);
+            display: flex;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        .checkout-wrapper {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+        }
+
+        h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 25px 0 12px 0;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--field-label);
+        }
+
+        /* تنسيق الحقول العامة */
+        input[type="text"], input[type="email"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            font-size: 15px;
+            outline: none;
+            box-sizing: border-box;
+            color: var(--text-main);
+        }
+
+        input::placeholder {
+            color: #a3a3a3;
+        }
+
+        /* تأثير الحقول المتداخلة كما في الصورة */
+        .stacked-group {
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .stacked-group input, .stacked-group select, .stacked-group .static-field {
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 0;
+        }
+
+        .stacked-group input:last-child, .stacked-group select:last-child {
+            border-bottom: none;
+        }
+
+        .static-field {
+            background-color: #f7f8f9;
+            padding: 12px;
+            color: var(--text-main);
+            font-size: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .row-flex {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .row-flex input {
+            border-bottom: none !important;
+        }
+
+        .row-flex input:first-child {
+            border-right: 1px solid var(--border-color) !important;
+        }
+
+        /* قسم الهاتف */
+        .phone-box {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0 10px;
+            margin-top: 10px;
+        }
+
+        .phone-box input {
+            border: none !important;
+        }
+
+        /* قسم وسيلة الدفع */
+        .payment-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .payment-method-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .radio-selected {
+            width: 14px; height: 14px;
+            border: 5px solid black;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .card-details-area {
+            padding: 15px;
+        }
+
+        .card-input-container {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .card-number-row {
+            display: flex;
+            align-items: center;
+            padding-right: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-logos {
+            display: flex;
+            gap: 4px;
+        }
+
+        .card-logos img {
+            height: 15px;
+        }
+
+        /* خيار Apple Pay */
+        .apple-pay-row {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .radio-empty {
+            width: 18px; height: 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        /* زر الدفع */
+        .btn-payer {
+            width: 100%;
+            background-color: var(--stripe-green);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 25px;
+            cursor: pointer;
+        }
+
+        /* خيارات الحفظ والشروط */
+        .checkbox-section {
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .checkbox-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-item input {
+            width: 18px; height: 18px;
+            accent-color: black;
+        }
+
+        /* التذييل */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .footer-bottom a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="checkout-wrapper">
+    
+    <section>
+        <h2>Informations de livraison</h2>
+        <label>E-mail</label>
+        <input type="email" placeholder="email@exemple.com" style="border-radius: 6px;">
+
+        <label style="margin-top: 15px;">Adresse de livraison</label>
+        <div class="stacked-group">
+            <input type="text" placeholder="Nom complet">
+            <div class="static-field">États-Unis</div>
+            <input type="text" placeholder="Ligne d'adresse n°1">
+            <input type="text" placeholder="Ligne d'adresse n°2">
+            <div class="row-flex">
+                <input type="text" placeholder="Ville">
+                <input type="text" placeholder="Code postal">
+            </div>
+            <select>
+                <option>État</option>
+            </select>
+        </div>
+
+        <div class="phone-box">
+            <span style="font-size: 18px;">🇺🇸</span>
+            <input type="text" value="(201) 555-0123">
+            <span style="color: #a3a3a3; font-size: 14px;">ⓘ</span>
+        </div>
+    </section>
+
+    <section>
+        <h2>Moyen de paiement</h2>
+        <div class="payment-card">
+            <div class="payment-method-header">
+                <div class="radio-selected"></div>
+                <span style="margin-right: 8px;">💳</span>
+                <span style="font-weight: 500;">Carte</span>
+            </div>
+
+            <div class="card-details-area">
+                <label style="font-size: 12px; color: var(--text-secondary);">Informations de la carte</label>
+                <div class="card-input-container">
+                    <div class="card-number-row">
+                        <input type="text" placeholder="1234 1234 1234 1234" style="border:none;">
+                        <div class="card-logos">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
+                        </div>
+                    </div>
+                    <div class="row-flex">
+                        <input type="text" placeholder="MM / AA">
+                        <input type="text" placeholder="CVC" style="background: url('https://img.icons8.com/ios/20/000000/credit-card-front.png') no-repeat right 10px center; background-size: 18px;">
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: flex-start; gap: 8px; margin-top: 15px;">
+                    <input type="checkbox" checked style="accent-color: black;">
+                    <span style="font-size: 12px; color: var(--text-main);">Les informations de facturation sont identiques aux informations de livraison</span>
+                </div>
+            </div>
+
+            <div class="apple-pay-row">
+                <div class="radio-empty"></div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" width="35" alt="Apple Pay">
+                <span style="margin-left: 5px; font-weight: 500;">Apple Pay</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="checkbox-section">
+        <div class="checkbox-item">
+            <input type="checkbox" id="save-info">
+            <label for="save-info" style="font-weight: normal;">
+                <strong style="color: black;">Enregistrer mes informations pour régler plus rapidement</strong><br>
+                Payez en toute sécurité chez Rugs.com et partout où Link est accepté.
+            </label>
+        </div>
+
+        <div class="checkbox-item">
+            <input type="checkbox" id="terms">
+            <label for="terms" style="font-weight: normal;">
+                J'accepte les <a href="#" style="color: black;">Conditions d'utilisation du service</a> et la <a href="#" style="color: black;">Politique de confidentialité</a> de Rugs.com.
+            </label>
+        </div>
+    </div>
+
+    <button class="btn-payer">Payer</button>
+
+    <div class="footer">
+        <a href="#" style="text-decoration: none; color: var(--text-secondary); font-size: 13px;">↩ Retours gratuits</a>
+        <div class="footer-bottom">
+            <span>Propulsé par <strong>stripe</strong></span>
+            <div class="links">
+                <a href="#">Mentions légales</a>
+                <a href="#">Retours</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
