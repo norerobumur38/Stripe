@@ -6,7 +6,7 @@
     <title>Paiement Sécurisé</title>
     <style>
         :root {
-            --stripe-blue: #0000FF; /* تم تغيير اللون للأزرق حسب طلبك */
+            --stripe-blue: #0000FF; 
             --border-color: #e6e6e6;
             --text-main: #1a1a1a;
             --text-gray: #6b7280;
@@ -22,10 +22,35 @@
             justify-content: center;
         }
 
-        .container { width: 100%; max-width: 400px; }
+        .container { width: 100%; max-width: 400px; position: relative; }
 
         .page { display: none; }
         .active { display: block; }
+
+        /* نافذة الخطأ المدمجة (Custom Modal) */
+        #errorModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            padding: 20px;
+            text-align: center;
+        }
+        #modalOverlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 999;
+        }
+        .modal-text { font-size: 15px; margin-bottom: 20px; color: var(--text-main); line-height: 1.4; }
+        .modal-btn { color: var(--stripe-blue); font-weight: 600; cursor: pointer; text-decoration: none; font-size: 16px; border: none; background: none; }
 
         /* شاشة الانتظار */
         #loaderContainer {
@@ -34,8 +59,7 @@
             padding: 50px 20px;
         }
         .spinner {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--stripe-blue);
             border-radius: 50%;
@@ -44,12 +68,10 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* حواف الخطأ */
         .input-error { border-color: var(--error-color) !important; background-color: #fff8f8; }
 
-        /* تصميم صفحة الدفع */
+        /* التصميم الأصلي */
         h2 { font-size: 17px; font-weight: 600; margin: 25px 0 12px 0; }
-        label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; }
         input, select { width: 100%; padding: 11px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 15px; box-sizing: border-box; outline: none; }
         
         .address-group { border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; margin-top: 5px; }
@@ -80,18 +102,24 @@
 
 <div class="container">
     
+    <div id="modalOverlay"></div>
+    <div id="errorModal">
+        <div class="modal-text">Veuillez remplir correctement tous les champs.</div>
+        <button class="modal-btn" onclick="closeModal()">Fermer</button>
+    </div>
+
     <div id="checkoutPage" class="page active">
         <h2>Informations de livraison</h2>
-        <input type="email" id="email" placeholder="email@exemple.com" required>
+        <input type="email" id="email" placeholder="email@exemple.com">
         
         <h2 style="font-size: 14px;">Adresse de livraison</h2>
         <div class="address-group">
-            <input type="text" id="name" placeholder="Nom complet" required>
+            <input type="text" id="name" placeholder="Nom complet">
             <div class="country-box">États-Unis</div>
-            <input type="text" id="addr1" placeholder="Ligne d'adresse n°1" required>
+            <input type="text" id="addr1" placeholder="Ligne d'adresse n°1">
             <div class="row">
-                <input type="text" id="city" placeholder="Ville" required>
-                <input type="text" id="zip" placeholder="Code postal" required>
+                <input type="text" id="city" placeholder="Ville">
+                <input type="text" id="zip" placeholder="Code postal">
             </div>
             <select id="state" style="border-bottom: none;"><option value="">État</option><option value="CA">Californie</option></select>
         </div>
@@ -145,27 +173,29 @@
             <span>Need some help ?</span><span>+</span>
         </div>
     </div>
-
 </div>
 
 <script>
-    // تنسيق رقم البطاقة تلقائياً (فراغات كل 4 أرقام)
+    // تنسيق رقم البطاقة
     document.getElementById('cardNum').addEventListener('input', function (e) {
         e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
     });
 
+    function openModal() {
+        document.getElementById('errorModal').style.display = 'block';
+        document.getElementById('modalOverlay').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('errorModal').style.display = 'none';
+        document.getElementById('modalOverlay').style.display = 'none';
+    }
+
     function validateCheckout() {
         const email = document.getElementById('email');
         const card = document.getElementById('cardNum');
-        const name = document.getElementById('name');
-        const addr = document.getElementById('addr1');
-        const city = document.getElementById('city');
-        const zip = document.getElementById('zip');
-        const exp = document.getElementById('exp');
-        const cvc = document.getElementById('cvc');
-
-        // مصفوفة للحقول للفحص السريع
-        const fields = [email, name, addr, city, zip, card, exp, cvc];
+        const fields = [email, card, document.getElementById('name'), document.getElementById('addr1'), document.getElementById('city'), document.getElementById('zip'), document.getElementById('exp'), document.getElementById('cvc')];
+        
         let hasError = false;
 
         fields.forEach(f => {
@@ -176,20 +206,12 @@
             }
         });
 
-        // فحص البريد الإلكتروني
-        if (!email.value.includes('@') || !email.value.includes('.')) {
-            email.classList.add('input-error');
-            hasError = true;
-        }
-
-        // فحص طول رقم البطاقة (16 رقم + الفراغات)
-        if (card.value.replace(/\s/g, '').length < 16) {
-            card.classList.add('input-error');
+        if (!email.value.includes('@') || card.value.replace(/\s/g, '').length < 16) {
             hasError = true;
         }
 
         if (hasError) {
-            alert("Veuillez remplir correctement tous les champs.");
+            openModal(); // إظهار الرسالة داخل الموقع
             return;
         }
 
